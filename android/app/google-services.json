@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1036625196893",
+    "project_id": "joistic-assigment",
+    "storage_bucket": "joistic-assigment.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036625196893:android:7e87f44e9a2f1720f1dab4",
+        "android_client_info": {
+          "package_name": "com.example.joistic_assignment"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD829sCJzrPiY3m9DLRjq4o_k-4t8AFDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
