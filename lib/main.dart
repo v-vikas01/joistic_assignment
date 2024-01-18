@@ -1,7 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:joistic_assignment/component/size_config.dart';
+import 'package:joistic_assignment/ui/home.dart';
+import 'package:joistic_assignment/ui/splash_screen.dart';
 
-import 'login.dart';
+import 'bloc/auth/authentication_bloc.dart';
+import 'bloc/home/home_bloc.dart';
+import 'helper/global_handler.dart';
+import 'ui/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,68 +26,67 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Demo App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const SplashScreen(),
+      routes: {
+        "/home": (context) => BlocProvider(
+              create: (context) => HomeBloc()..add(const FetchListEvent()),
+              child: const HomeScreen(),
+            ),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class Authentication extends StatefulWidget {
+  const Authentication({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Authentication> createState() => _AuthenticationState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _AuthenticationState extends State<Authentication> {
+  late AuthenticationBloc authenticationBloc;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    GlobalBlocClass.authenticationBloc =
+        BlocProvider.of<AuthenticationBloc>(context);
+    GlobalBlocClass.authenticationContext = context;
+    authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => GoogleSignInScreen(),
-          ));
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    SizeConfig().init(context);
+    return BlocBuilder(
+        bloc: authenticationBloc,
+        builder: (context, state) {
+          if (state is AuthenticationLoading) {
+            return const SplashScreen();
+          }
+          if (state is AuthenticationLoginRequired) {
+            return const SignInScreen();
+          }
+          if (state is AuthenticationHomeScreen) {
+            return BlocProvider(
+              create: (context) => HomeBloc()..add(const FetchListEvent()),
+              child: const HomeScreen(),
+            );
+          }
+          return const SignInScreen();
+        });
   }
 }
